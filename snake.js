@@ -7,7 +7,6 @@
 		this.size = { x: screen.canvas.width, y: screen.canvas.height };
 		screen.lineWidth = 10;
 		screen.strokeRect(0, 0, this.size.x, this.size.y);
-
 		this.center = { x: this.size.x / 2, y: this.size.y / 2 };
 
 		this.bodies = [new Player(this), new Food(this)];
@@ -31,9 +30,9 @@
 	    },
 
 	    draw: function(screen) {
-	    	screen.clearRect(10, 10, this.size.x - 15, this.size.y - 15);
+	    	screen.clearRect(5, 5, this.size.x - 10, this.size.y - 10);
 		    for (var i = 0; i < this.bodies.length; i++) {
-		    	drawRect(screen, this.bodies[i]);
+		    	this.bodies[i].draw(screen);
 		    }
 	    },
 
@@ -48,8 +47,6 @@
 	      }
 	    }
   	};
-
-
 
   	// PLAYER
 	var Player = function(game) {
@@ -90,10 +87,24 @@
 					break;
 			}
 
+			// Wall collision - reflection
+			console.log('this.center.x', this.center.x);
+			if (this.center.x + this.size.x / 2 > this.game.size.x) {
+				this.center.x = 10;
+			} else if (this.center.x + this.size.x / 2 < 0) {
+				this.center.x = this.game.size.x - 10;
+			} else if (this.center.y + this.size.y / 2 > this.game.size.y) {
+				this.center.y = 10;
+			} else if (this.center.y + this.size.y / 2 < 0) {
+				this.center.y = this.game.size.y - 10;
+			}
+
 		},
 
-		draw: function() {
-		 	console.log('draw');
+		draw: function(screen) {
+ 	    	screen.fillRect(this.center.x - this.size.x / 2,
+			    this.center.y - this.size.y / 2,
+				this.size.x, this.size.y);
 		},
 
 		collision: function(otherBody) {
@@ -106,14 +117,14 @@
 		}
 	};
 
-	// PLAYER
+	// FOOD
 	var Food = function(game) {
     	this.game = game;
    	 	this.size = { x: 5, y: 5 };
 
     	this.center = {
-    		x: Math.floor(Math.random() * game.size.x) + 1,
-    		y: Math.floor(Math.random() * game.size.y) + 1
+    		x: Math.floor(Math.random() * (game.size.x - 10)) + 10,
+    		y: Math.floor(Math.random() * (game.size.y - 10)) + 10
     	};
 
     	this.keyboarder = new Keyboarder();
@@ -124,6 +135,16 @@
   		update: function() {
 
   		},
+
+  		draw: function(screen) {
+  			screen.fillRect(this.center.x - this.size.x / 2,
+			    this.center.y - this.size.y / 2,
+				this.size.x, this.size.y);
+  			// screen.arc(this.center.x - this.size.x / 2,
+  			// 	this.center.y - this.size.y / 2,
+  			// 	10,	0, Math.PI*2, true);
+  		},
+
   		collision: function() {
   			this.game.removeBody(this);
   			this.game.addBody(new Food(this.game));
@@ -159,7 +180,7 @@
 
   	var isColliding = function(b1, b2) {
     	return !(
-     	b1 === b2 ||
+     		b1 === b2 ||
 	        b1.center.x + b1.size.x / 2 < b2.center.x - b2.size.x / 2 ||
 	        b1.center.y + b1.size.y / 2 < b2.center.y - b2.size.y / 2 ||
 	        b1.center.x - b1.size.x / 2 > b2.center.x + b2.size.x / 2 ||
