@@ -9,7 +9,7 @@
 		screen.strokeRect(0, 0, this.size.x, this.size.y);
 		this.center = { x: this.size.x / 2, y: this.size.y / 2 };
 
-		this.bodies = [new Player(this), new Food(this)];
+		this.bodies = [new Snake(this), new Food(this)];
 
 		var self = this;
 		var tick = function() {
@@ -48,19 +48,26 @@
 	    }
   	};
 
-  	// PLAYER
-	var Player = function(game) {
+  	// SNAKE
+	var Snake = function(game) {
     	this.game = game;
    	 	this.size = { x: 10, y: 10 };
 
-    	this.center = { x: game.size.x / 2, y: game.size.y / 2};
+    	this.center = {x: game.size.x / 2, y: game.size.y / 2};
+    	this.tail = [
+	    	{x:game.size.x / 2 - 10, y:game.size.y / 2},
+	    	{x:game.size.x / 2 - 20, y:game.size.y / 2},
+	    	{x:game.size.x / 2 - 30, y:game.size.y / 2},
+	    	{x:game.size.x / 2 - 40, y:game.size.y / 2}
+    	];
+
     	this.keyboarder = new Keyboarder();
 
-   	 	this.speed = 1.5;
+   	 	this.speed = 0.5;
    	 	this.direction = 'right';
   	};
 
-	Player.prototype = {
+	Snake.prototype = {
 		update: function() {
 			if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
 				this.direction = 'left';
@@ -74,21 +81,56 @@
 
 			switch(this.direction){
 				case 'left':
+					for (var i = this.tail.length - 1; i >= 0; i--) {
+						if (i === 0) {
+							this.tail[i].x = this.center.x + this.size.x;
+							this.tail[i].y = this.center.y;
+						} else{
+							this.tail[i].x = this.tail[i-1].x + this.size.x;
+							this.tail[i].y = this.tail[i-1].y;
+						}
+					};
 					this.center.x -= this.speed;
 					break;
 				case 'right':
+					for (var i = this.tail.length - 1; i >= 0; i--) {
+						if (i === 0) {
+							this.tail[i].x = this.center.x - this.size.x;
+							this.tail[i].y = this.center.y;
+						} else{
+							this.tail[i].x = this.tail[i-1].x - this.size.x;
+							this.tail[i].y = this.tail[i-1].y;
+						}
+					};
 					this.center.x += this.speed;
 					break;
 				case 'up':
+					for (var i = this.tail.length - 1; i >= 0; i--) {
+						if (i === 0) {
+							this.tail[i].x = this.center.x;
+							this.tail[i].y = this.center.y - this.size.y;
+						} else{
+							this.tail[i].x = this.tail[i-1].x;
+							this.tail[i].y = this.tail[i-1].y - this.size.y;
+						}
+					};
 					this.center.y -= this.speed;
 					break;
 				case 'down':
+					for (var i = this.tail.length - 1; i >= 0; i--) {
+						if (i === 0) {
+							this.tail[i].x = this.center.x;
+							this.tail[i].y = this.center.y + this.size.y;
+						} else{
+							this.tail[i].x = this.tail[i-1].x;
+							this.tail[i].y = this.tail[i-1].y + this.size.y;
+						}
+					};
 					this.center.y += this.speed;
 					break;
 			}
 
 			// Wall collision - reflection
-			console.log('this.center.x', this.center.x);
 			if (this.center.x + this.size.x / 2 > this.game.size.x) {
 				this.center.x = 10;
 			} else if (this.center.x + this.size.x / 2 < 0) {
@@ -105,6 +147,11 @@
  	    	screen.fillRect(this.center.x - this.size.x / 2,
 			    this.center.y - this.size.y / 2,
 				this.size.x, this.size.y);
+ 	    	for (var i = 0; i < this.tail.length; i++) {
+ 	    		screen.fillRect(this.tail[i].x - this.size.x / 2,
+			    	this.tail[i].y - this.size.y / 2,
+					this.size.x, this.size.y);
+ 	    	};
 		},
 
 		collision: function(otherBody) {
