@@ -3,7 +3,11 @@
 	// GAME
 	var Game = function() {
 		var screen = document.getElementById("screen").getContext('2d');
+
 		this.size = { x: screen.canvas.width, y: screen.canvas.height };
+		screen.lineWidth = 10;
+		screen.strokeRect(0, 0, this.size.x, this.size.y);
+
 		this.center = { x: this.size.x / 2, y: this.size.y / 2 };
 
 		this.bodies = [new Player(this), new Food(this)];
@@ -27,7 +31,7 @@
 	    },
 
 	    draw: function(screen) {
-	    	screen.clearRect(5, 5, this.size.x - 5, this.size.y - 5);
+	    	screen.clearRect(10, 10, this.size.x - 15, this.size.y - 15);
 		    for (var i = 0; i < this.bodies.length; i++) {
 		    	drawRect(screen, this.bodies[i]);
 		    }
