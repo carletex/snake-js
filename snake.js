@@ -15,17 +15,19 @@
 		var tick = function() {
 			self.update();
 			self.draw(screen);
-			requestAnimationFrame(tick);
+			self.animationID = requestAnimationFrame(tick);
 		};
-
 		tick();
+		console.log('ID', this.animationID);
 	};
 
 	Game.prototype = {
 	    update: function() {
 	    	reportCollisions(this.bodies);
-	    	for (var i = 0; i < this.bodies.length; i++) {
-        		this.bodies[i].update();
+	    	for (var j = 0; j < this.bodies[0].updatePerTick; j++) {
+	    		for (var i = 0; i < this.bodies.length; i++) {
+        			this.bodies[i].update();
+      			}
       		}
 	    },
 
@@ -48,87 +50,100 @@
 	    }
   	};
 
+  	var SnakeSegment = function(conf) {
+  		this.x = conf.x;
+  		this.y = conf.y;
+  		this.direction = conf.direction;
+   	 	this.size = { x: conf.size, y: conf.size };
+  	}
+
   	// SNAKE
 	var Snake = function(game) {
     	this.game = game;
    	 	this.size = { x: 10, y: 10 };
 
-    	this.center = {x: game.size.x / 2, y: game.size.y / 2};
     	this.tail = [
-	    	{x:game.size.x / 2 - 10, y:game.size.y / 2},
-	    	{x:game.size.x / 2 - 20, y:game.size.y / 2},
-	    	{x:game.size.x / 2 - 30, y:game.size.y / 2},
-	    	{x:game.size.x / 2 - 40, y:game.size.y / 2}
-    	];
+    		new SnakeSegment({x: game.size.x / 2, y: game.size.y / 2, size: 10, direction: 'r'}),
+    		new SnakeSegment({x: game.size.x / 2 - 10, y: game.size.y / 2, size: 10, direction: 'r'}),
+    		new SnakeSegment({x: game.size.x / 2 - 20, y: game.size.y / 2, size: 10, direction: 'r'}),
+    		new SnakeSegment({x: game.size.x / 2 - 30, y: game.size.y / 2, size: 10, direction: 'r'}),
+    		new SnakeSegment({x: game.size.x / 2 - 40, y: game.size.y / 2, size: 10, direction: 'r'})
+    	]
+    	this.center = this.tail[0];
 
     	this.keyboarder = new Keyboarder();
 
    	 	this.speed = 0.5;
-   	 	this.direction = 'right';
+   	 	this.changeSpeed = false;
+
+		this.updatePerTick = 1;
+
   	};
 
 	Snake.prototype = {
 		update: function() {
-			if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
-				this.direction = 'left';
-			} else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT)) {
-				this.direction = 'right';
-			} else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP)) {
-				this.direction = 'up';
-			} else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN)) {
-				this.direction = 'down';
+
+			// Change head direction
+			if (this.tail[0].direction === this.tail[1].direction) {
+				if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) &&
+					this.tail[0].direction != 'r') {
+					this.tail[0].direction = 'l';
+				} else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) &&
+					this.tail[0].direction != 'l') {
+					this.tail[0].direction = 'r';
+				} else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP) &&
+					this.tail[0].direction != 'd') {
+					this.tail[0].direction = 'u';
+				} else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) &&
+					this.tail[0].direction != 'u') {
+					this.tail[0].direction = 'd';
+				}
 			}
 
-			switch(this.direction){
-				case 'left':
-					for (var i = this.tail.length - 1; i >= 0; i--) {
-						if (i === 0) {
-							this.tail[i].x = this.center.x + this.size.x;
-							this.tail[i].y = this.center.y;
-						} else{
-							this.tail[i].x = this.tail[i-1].x + this.size.x;
-							this.tail[i].y = this.tail[i-1].y;
-						}
-					};
-					this.center.x -= this.speed;
-					break;
-				case 'right':
-					for (var i = this.tail.length - 1; i >= 0; i--) {
-						if (i === 0) {
-							this.tail[i].x = this.center.x - this.size.x;
-							this.tail[i].y = this.center.y;
-						} else{
-							this.tail[i].x = this.tail[i-1].x - this.size.x;
-							this.tail[i].y = this.tail[i-1].y;
-						}
-					};
-					this.center.x += this.speed;
-					break;
-				case 'up':
-					for (var i = this.tail.length - 1; i >= 0; i--) {
-						if (i === 0) {
-							this.tail[i].x = this.center.x;
-							this.tail[i].y = this.center.y - this.size.y;
-						} else{
-							this.tail[i].x = this.tail[i-1].x;
-							this.tail[i].y = this.tail[i-1].y - this.size.y;
-						}
-					};
-					this.center.y -= this.speed;
-					break;
-				case 'down':
-					for (var i = this.tail.length - 1; i >= 0; i--) {
-						if (i === 0) {
-							this.tail[i].x = this.center.x;
-							this.tail[i].y = this.center.y + this.size.y;
-						} else{
-							this.tail[i].x = this.tail[i-1].x;
-							this.tail[i].y = this.tail[i-1].y + this.size.y;
-						}
-					};
-					this.center.y += this.speed;
-					break;
+			for (var i = 0; i < this.tail.length; i++) {
+
+				// Move the segments
+				switch(this.tail[i].direction) {
+				 	case 'l':
+						this.tail[i].x -= this.speed;
+						break;
+					case 'r':
+						this.tail[i].x += this.speed;
+						break;
+					case 'u':
+						this.tail[i].y -= this.speed;
+						break;
+					case 'd':
+						this.tail[i].y += this.speed;
+						break;
+				}
 			}
+			// Change segments directions
+			for (var i = this.tail.length -1; i >= 1; i--) {
+
+				var before = this.tail[i-1];
+				if (this.tail[i].direction === before.direction) continue;
+				switch(before.direction) {
+				 	case 'l':
+					case 'r':
+						if (this.tail[i].y === before.y) {
+							this.tail[i].direction = before.direction;
+						}
+						break;
+					case 'u':
+					case 'd':
+						if (this.tail[i].x === before.x) {
+							this.tail[i].direction = before.direction;
+						}
+						break;
+				}
+
+				if (this.tail[1].direction ==='l' && this.tail[2].direction === 'r') {
+					console.log(this.tail);
+					cancelAnimationFrame(1);
+				}
+			};
+
 
 			// Wall collision - reflection
 			if (this.center.x + this.size.x / 2 > this.game.size.x) {
@@ -144,23 +159,43 @@
 		},
 
 		draw: function(screen) {
- 	    	screen.fillRect(this.center.x - this.size.x / 2,
-			    this.center.y - this.size.y / 2,
-				this.size.x, this.size.y);
  	    	for (var i = 0; i < this.tail.length; i++) {
  	    		screen.fillRect(this.tail[i].x - this.size.x / 2,
 			    	this.tail[i].y - this.size.y / 2,
 					this.size.x, this.size.y);
  	    	};
+ 	    	if (this.changeSpeed){
+				this.speed *= 2;
+				this.changeSpeed = false;
+			}
 		},
 
-		collision: function(otherBody) {
-			if (this.direction === 'left' || this.direction === 'right') {
-				this.size.x += 10;
-			} else {
-				this.size.y += 10;
+		collision: function() {
+			var last = this.tail[this.tail.length - 1];
+			var newSegment = new SnakeSegment({
+				direction: last.direction,
+				size: 10
+			});
+			switch(last.direction) {
+			 	case 'l':
+					newSegment.x = last.x + last.size.x;
+					newSegment.y = last.y;
+					break;
+				case 'r':
+					newSegment.x = last.x - last.size.x;
+					newSegment.y = last.y;
+					break;
+				case 'u':
+					newSegment.x = last.x;
+					newSegment.y = last.y + last.size.y;
+					break;
+				case 'd':
+					newSegment.x = last.x;
+					newSegment.y = last.y - last.size.y;
+					break;
 			}
-
+			this.tail.push(newSegment);
+			this.updatePerTick += 1;
 		}
 	};
 
