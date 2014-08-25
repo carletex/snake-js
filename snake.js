@@ -9,7 +9,12 @@
 		screen.strokeRect(0, 0, this.size.x, this.size.y);
 		this.center = { x: this.size.x / 2, y: this.size.y / 2 };
 
-		this.bodies = [new Snake(this), new Food(this)];
+		this.bodies = [
+			new SnakeSegment(this, 0, {x: this.size.x / 2, y: this.size.y / 2, direction: 'r'}),
+			new Food(this)
+			];
+
+   	 	this.speed = 1;
 
 		var self = this;
 		var tick = function() {
@@ -47,142 +52,122 @@
 	    }
   	};
 
-  	// Snake segment
-  	var SnakeSegment = function(conf) {
-  		this.x = conf.x;
-  		this.y = conf.y;
-  		this.direction = conf.direction;
-   	 	this.size = { x: conf.size, y: conf.size };
-  	}
-
-  	// Snake
-	var Snake = function(game) {
+  	// Snake Segment
+	var SnakeSegment = function(game, position, conf) {
     	this.game = game;
    	 	this.size = { x: 10, y: 10 };
+   	 	this.position = position;
 
-    	this.tail = [
-    		new SnakeSegment({x: game.size.x / 2, y: game.size.y / 2, size: 10, direction: 'r'}),
-    		new SnakeSegment({x: game.size.x / 2 - 10, y: game.size.y / 2, size: 10, direction: 'r'}),
-    		new SnakeSegment({x: game.size.x / 2 - 20, y: game.size.y / 2, size: 10, direction: 'r'}),
-    		new SnakeSegment({x: game.size.x / 2 - 30, y: game.size.y / 2, size: 10, direction: 'r'}),
-    		new SnakeSegment({x: game.size.x / 2 - 40, y: game.size.y / 2, size: 10, direction: 'r'})
-    	]
-    	this.center = this.tail[0];
+	   	this.center = { x: conf.x, y: conf.y };
+	   	this.direction = conf.direction;
 
     	this.keyboarder = new Keyboarder();
 
-   	 	this.speed = 0.5;
   	};
 
-	Snake.prototype = {
+	SnakeSegment.prototype = {
 		update: function() {
 
 			// Change head direction
-			if (this.tail[0].direction === this.tail[1].direction) {
-				if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) &&
-					this.tail[0].direction != 'r') {
-					this.tail[0].direction = 'l';
-				} else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) &&
-					this.tail[0].direction != 'l') {
-					this.tail[0].direction = 'r';
-				} else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP) &&
-					this.tail[0].direction != 'd') {
-					this.tail[0].direction = 'u';
-				} else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) &&
-					this.tail[0].direction != 'u') {
-					this.tail[0].direction = 'd';
-				}
+			if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
+				this.direction = 'l';
+			} else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT)) {
+				this.direction = 'r';
+			} else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP)) {
+				this.direction = 'u';
+			} else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN)) {
+				this.direction = 'd';
 			}
 
-			for (var i = 0; i < this.tail.length; i++) {
+			// for (var i = 0; i < this.tail.length; i++) {
 
 				// Move the segments
-				switch(this.tail[i].direction) {
+				switch(this.direction) {
 				 	case 'l':
-						this.tail[i].x -= this.speed;
+						this.center.x -= this.game.speed;
 						break;
 					case 'r':
-						this.tail[i].x += this.speed;
+						this.center.x += this.game.speed;
 						break;
 					case 'u':
-						this.tail[i].y -= this.speed;
+						this.center.y -= this.game.speed;
 						break;
 					case 'd':
-						this.tail[i].y += this.speed;
+						this.center.y += this.game.speed;
 						break;
 				}
-			}
-			// Change segments directions
-			for (var i = this.tail.length -1; i >= 1; i--) {
+			// }
+			// // Change segments directions
+			// for (var i = this.tail.length -1; i >= 1; i--) {
 
-				var before = this.tail[i-1];
-				if (this.tail[i].direction === before.direction) continue;
-				switch(before.direction) {
-				 	case 'l':
-					case 'r':
-						if (this.tail[i].y === before.y) {
-							this.tail[i].direction = before.direction;
-						}
-						break;
-					case 'u':
-					case 'd':
-						if (this.tail[i].x === before.x) {
-							this.tail[i].direction = before.direction;
-						}
-						break;
-				}
+			// 	var before = this.tail[i-1];
+			// 	if (this.tail[i].direction === before.direction) continue;
+			// 	switch(before.direction) {
+			// 	 	case 'l':
+			// 		case 'r':
+			// 			if (this.tail[i].y === before.y) {
+			// 				this.tail[i].direction = before.direction;
+			// 			}
+			// 			break;
+			// 		case 'u':
+			// 		case 'd':
+			// 			if (this.tail[i].x === before.x) {
+			// 				this.tail[i].direction = before.direction;
+			// 			}
+			// 			break;
+			// 	}
 
-			};
+			// };
 
 
-			// Wall collision - reflection
-			if (this.center.x + this.size.x / 2 > this.game.size.x) {
-				this.center.x = 10;
-			} else if (this.center.x + this.size.x / 2 < 0) {
-				this.center.x = this.game.size.x - 10;
-			} else if (this.center.y + this.size.y / 2 > this.game.size.y) {
-				this.center.y = 10;
-			} else if (this.center.y + this.size.y / 2 < 0) {
-				this.center.y = this.game.size.y - 10;
-			}
+			// // Wall collision - reflection
+			// if (this.center.x + this.size.x / 2 > this.game.size.x) {
+			// 	this.center.x = 10;
+			// } else if (this.center.x + this.size.x / 2 < 0) {
+			// 	this.center.x = this.game.size.x - 10;
+			// } else if (this.center.y + this.size.y / 2 > this.game.size.y) {
+			// 	this.center.y = 10;
+			// } else if (this.center.y + this.size.y / 2 < 0) {
+			// 	this.center.y = this.game.size.y - 10;
+			// }
 
 		},
 
 		draw: function(screen) {
- 	    	for (var i = 0; i < this.tail.length; i++) {
- 	    		screen.fillRect(this.tail[i].x - this.size.x / 2,
-			    	this.tail[i].y - this.size.y / 2,
+ 	    	// for (var i = 0; i < this.tail.length; i++) {
+ 	    		screen.fillRect(this.center.x - this.size.x / 2,
+			    	this.center.y - this.size.y / 2,
 					this.size.x, this.size.y);
- 	    	};
+ 	    	// };
 
 		},
 
 		collision: function() {
-			var last = this.tail[this.tail.length - 1];
-			var newSegment = new SnakeSegment({
-				direction: last.direction,
-				size: 10
-			});
-			switch(last.direction) {
-			 	case 'l':
-					newSegment.x = last.x + last.size.x;
-					newSegment.y = last.y;
-					break;
-				case 'r':
-					newSegment.x = last.x - last.size.x;
-					newSegment.y = last.y;
-					break;
-				case 'u':
-					newSegment.x = last.x;
-					newSegment.y = last.y + last.size.y;
-					break;
-				case 'd':
-					newSegment.x = last.x;
-					newSegment.y = last.y - last.size.y;
-					break;
-			}
-			this.tail.push(newSegment);
-			this.speed *= 2;
+			// var last = this.tail[this.tail.length - 1];
+			// var newSegment = new SnakeSegment({
+			// 	direction: last.direction,
+			// 	size: 10
+			// });
+			// switch(last.direction) {
+			//  	case 'l':
+			// 		newSegment.x = last.x + last.size.x;
+			// 		newSegment.y = last.y;
+			// 		break;
+			// 	case 'r':
+			// 		newSegment.x = last.x - last.size.x;
+			// 		newSegment.y = last.y;
+			// 		break;
+			// 	case 'u':
+			// 		newSegment.x = last.x;
+			// 		newSegment.y = last.y + last.size.y;
+			// 		break;
+			// 	case 'd':
+			// 		newSegment.x = last.x;
+			// 		newSegment.y = last.y - last.size.y;
+			// 		break;
+			// }
+			// this.tail.push(newSegment);
+			// this.speed *= 2;
 
 		}
 	};
