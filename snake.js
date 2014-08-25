@@ -23,9 +23,9 @@
 			self.animationID = requestAnimationFrame(tick);
 		};
 		tick();
-	};
+	}
 
-	Game.prototype = {
+;	Game.prototype = {
 	    update: function() {
 	    	reportCollisions(this.bodies);
     		for (var i = 0; i < this.bodies.length; i++) {
