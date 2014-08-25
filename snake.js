@@ -73,7 +73,20 @@
 
 		},
 		update: function (argument) {
-			return;
+			switch(this.direction) {
+			 	case 'l':
+					this.center.x -= this.game.speed;
+					break;
+				case 'r':
+					this.center.x += this.game.speed;
+					break;
+				case 'u':
+					this.center.y -= this.game.speed;
+					break;
+				case 'd':
+					this.center.y += this.game.speed;
+					break;
+			}
 		}
 
 	};
@@ -128,24 +141,6 @@
 				break;
 		}
 
-		// Move the tail
-		for (var i = 0; i < this.tail.length; i++) {
-			switch(this.tail[i].direction) {
-			 	case 'l':
-					this.tail[i].center.x -= this.game.speed;
-					break;
-				case 'r':
-					this.tail[i].center.x += this.game.speed;
-					break;
-				case 'u':
-					this.tail[i].center.y -= this.game.speed;
-					break;
-				case 'd':
-					this.tail[i].center.y += this.game.speed;
-					break;
-			}
-		}
-
 		// Change segments directions
 		for (var i = this.tail.length - 1; i >= 0; i--) {
 
@@ -167,8 +162,6 @@
 			}
 
 		};
-
-
 
 		// Wall collision
 		if (this.center.x + this.size.x / 2 > this.game.size.x) {
@@ -207,10 +200,8 @@
 					break;
 		}
 		this._addSegment(newSegment);
-
 		}
 
-		// this.speed *= 2;
 
 	}
 
