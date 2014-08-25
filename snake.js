@@ -9,10 +9,10 @@
 		screen.strokeRect(0, 0, this.size.x, this.size.y);
 		this.center = { x: this.size.x / 2, y: this.size.y / 2 };
 
-		this.bodies = [
-			new SnakeSegment(this, 0, {x: this.size.x / 2, y: this.size.y / 2, direction: 'r'}),
-			new Food(this)
-			];
+		this.bodies = [new Food(this)];
+
+		this.snake = new Snake(this);
+		this.snake.addSegment({x: this.size.x / 2, y: this.size.y / 2, direction: 'r'})
 
    	 	this.speed = 1;
 
@@ -52,11 +52,24 @@
 	    }
   	};
 
+  	// Snake
+  	var Snake = function(game) {
+  		this.game = game;
+  		this.tail = [];
+  	};
+
+  	Snake.prototype = {
+  		addSegment: function(conf) {
+  			segment = new SnakeSegment(this.game, conf)
+  			this.tail.push(segment);
+  			this.game.bodies.push(segment);
+  		}
+  	};
+
   	// Snake Segment
-	var SnakeSegment = function(game, position, conf) {
+	var SnakeSegment = function(game, conf) {
     	this.game = game;
    	 	this.size = { x: 10, y: 10 };
-   	 	this.position = position;
 
 	   	this.center = { x: conf.x, y: conf.y };
 	   	this.direction = conf.direction;
@@ -79,24 +92,22 @@
 				this.direction = 'd';
 			}
 
-			// for (var i = 0; i < this.tail.length; i++) {
 
-				// Move the segments
-				switch(this.direction) {
-				 	case 'l':
-						this.center.x -= this.game.speed;
-						break;
-					case 'r':
-						this.center.x += this.game.speed;
-						break;
-					case 'u':
-						this.center.y -= this.game.speed;
-						break;
-					case 'd':
-						this.center.y += this.game.speed;
-						break;
-				}
-			// }
+			// Move the segment
+			switch(this.direction) {
+			 	case 'l':
+					this.center.x -= this.game.speed;
+					break;
+				case 'r':
+					this.center.x += this.game.speed;
+					break;
+				case 'u':
+					this.center.y -= this.game.speed;
+					break;
+				case 'd':
+					this.center.y += this.game.speed;
+					break;
+			}
 			// // Change segments directions
 			// for (var i = this.tail.length -1; i >= 1; i--) {
 
@@ -120,16 +131,16 @@
 			// };
 
 
-			// // Wall collision - reflection
-			// if (this.center.x + this.size.x / 2 > this.game.size.x) {
-			// 	this.center.x = 10;
-			// } else if (this.center.x + this.size.x / 2 < 0) {
-			// 	this.center.x = this.game.size.x - 10;
-			// } else if (this.center.y + this.size.y / 2 > this.game.size.y) {
-			// 	this.center.y = 10;
-			// } else if (this.center.y + this.size.y / 2 < 0) {
-			// 	this.center.y = this.game.size.y - 10;
-			// }
+			// Wall collision
+			if (this.center.x + this.size.x / 2 > this.game.size.x) {
+				this.center.x = 10;
+			} else if (this.center.x + this.size.x / 2 < 0) {
+				this.center.x = this.game.size.x - 10;
+			} else if (this.center.y + this.size.y / 2 > this.game.size.y) {
+				this.center.y = 10;
+			} else if (this.center.y + this.size.y / 2 < 0) {
+				this.center.y = this.game.size.y - 10;
+			}
 
 		},
 
@@ -142,31 +153,32 @@
 
 		},
 
-		collision: function() {
-			// var last = this.tail[this.tail.length - 1];
-			// var newSegment = new SnakeSegment({
-			// 	direction: last.direction,
-			// 	size: 10
-			// });
-			// switch(last.direction) {
-			//  	case 'l':
-			// 		newSegment.x = last.x + last.size.x;
-			// 		newSegment.y = last.y;
-			// 		break;
-			// 	case 'r':
-			// 		newSegment.x = last.x - last.size.x;
-			// 		newSegment.y = last.y;
-			// 		break;
-			// 	case 'u':
-			// 		newSegment.x = last.x;
-			// 		newSegment.y = last.y + last.size.y;
-			// 		break;
-			// 	case 'd':
-			// 		newSegment.x = last.x;
-			// 		newSegment.y = last.y - last.size.y;
-			// 		break;
-			// }
-			// this.tail.push(newSegment);
+		collision: function(otherBody) {
+			// debugger;
+			if (otherBody instanceof Food) {
+				var last = this.game.snake.tail[this.game.snake.tail.length - 1];
+				var newSegment = {direction: last.direction};
+				switch(last.direction) {
+				 	case 'l':
+						newSegment.x = last.center.x + last.size.x;
+						newSegment.y = last.center.y;
+						break;
+					case 'r':
+						newSegment.x = last.center.x - last.size.x;
+						newSegment.y = last.center.y;
+						break;
+					case 'u':
+						newSegment.x = last.center.x;
+						newSegment.y = last.center.y + last.size.y;
+						break;
+					case 'd':
+						newSegment.x = last.center.x;
+						newSegment.y = last.center.y - last.size.y;
+						break;
+			}
+			this.game.snake.addSegment(newSegment);
+			}
+
 			// this.speed *= 2;
 
 		}
