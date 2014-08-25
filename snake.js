@@ -3,6 +3,8 @@
 	// GAME
 	var Game = function() {
 		var screen = document.getElementById("screen").getContext('2d');
+		this.screenScore = document.getElementById("score");
+		this.score = 0;
 
 		this.size = { x: screen.canvas.width, y: screen.canvas.height };
 		screen.lineWidth = 10;
@@ -198,7 +200,9 @@
 					newSegment.x = last.center.x;
 					newSegment.y = last.center.y - last.size.y;
 					break;
-		}
+			}
+		this.game.score += 100;
+		this.game.screenScore.innerHTML = this.game.score;
 		this._addSegment(newSegment);
 		}
 
