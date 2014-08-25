@@ -18,17 +18,14 @@
 			self.animationID = requestAnimationFrame(tick);
 		};
 		tick();
-		console.log('ID', this.animationID);
 	};
 
 	Game.prototype = {
 	    update: function() {
 	    	reportCollisions(this.bodies);
-	    	for (var j = 0; j < this.bodies[0].updatePerTick; j++) {
-	    		for (var i = 0; i < this.bodies.length; i++) {
-        			this.bodies[i].update();
-      			}
-      		}
+    		for (var i = 0; i < this.bodies.length; i++) {
+    			this.bodies[i].update();
+  			}
 	    },
 
 	    draw: function(screen) {
@@ -50,6 +47,7 @@
 	    }
   	};
 
+  	// Snake segment
   	var SnakeSegment = function(conf) {
   		this.x = conf.x;
   		this.y = conf.y;
@@ -57,7 +55,7 @@
    	 	this.size = { x: conf.size, y: conf.size };
   	}
 
-  	// SNAKE
+  	// Snake
 	var Snake = function(game) {
     	this.game = game;
    	 	this.size = { x: 10, y: 10 };
@@ -74,10 +72,6 @@
     	this.keyboarder = new Keyboarder();
 
    	 	this.speed = 0.5;
-   	 	this.changeSpeed = false;
-
-		this.updatePerTick = 1;
-
   	};
 
 	Snake.prototype = {
@@ -138,10 +132,6 @@
 						break;
 				}
 
-				if (this.tail[1].direction ==='l' && this.tail[2].direction === 'r') {
-					console.log(this.tail);
-					cancelAnimationFrame(1);
-				}
 			};
 
 
@@ -164,10 +154,7 @@
 			    	this.tail[i].y - this.size.y / 2,
 					this.size.x, this.size.y);
  	    	};
- 	    	if (this.changeSpeed){
-				this.speed *= 2;
-				this.changeSpeed = false;
-			}
+
 		},
 
 		collision: function() {
@@ -195,11 +182,12 @@
 					break;
 			}
 			this.tail.push(newSegment);
-			this.updatePerTick += 1;
+			this.speed *= 2;
+
 		}
 	};
 
-	// FOOD
+	// Food
 	var Food = function(game) {
     	this.game = game;
    	 	this.size = { x: 5, y: 5 };
@@ -222,9 +210,6 @@
   			screen.fillRect(this.center.x - this.size.x / 2,
 			    this.center.y - this.size.y / 2,
 				this.size.x, this.size.y);
-  			// screen.arc(this.center.x - this.size.x / 2,
-  			// 	this.center.y - this.size.y / 2,
-  			// 	10,	0, Math.PI*2, true);
   		},
 
   		collision: function() {
@@ -234,7 +219,7 @@
   	}
 
 
-	// KEYBOARD
+	// Keyboard
 	var Keyboarder = function() {
 	    var keyState = {};
 
@@ -253,13 +238,7 @@
 	    this.KEYS = {LEFT: 37, RIGHT: 39, UP: 38, DOWN: 40};
   	};
 
-	// AUX FUNCTIONS
-	var drawRect = function(screen, body) {
-    	screen.fillRect(body.center.x - body.size.x / 2,
-    				    body.center.y - body.size.y / 2,
-						body.size.x, body.size.y);
-  	};
-
+	// Helper functions
   	var isColliding = function(b1, b2) {
     	return !(
      		b1 === b2 ||
@@ -291,7 +270,7 @@
 	    }
   	};
 
-  	// INIT
+  	// Init
   	window.addEventListener('load', function() {
     	new Game();
   	});
