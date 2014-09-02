@@ -18,7 +18,6 @@
 
    	 	this.stop = 0;
 
-
 		var self = this;
 		var tick = function() {
 			self.update();
@@ -30,32 +29,34 @@
 		};
 		tick();
 
-	}
+	};
 
-;	Game.prototype = {
+	Game.prototype = {
 	    update: function() {
 	    	reportCollisions(this.bodies);
-    		for (var i = 0; i < this.bodies.length; i++) {
-    			this.bodies[i].update();
-  			}
+	    	for (var j = 0; j < this.speed; j++) {
+    			for (var i = 0; i < this.bodies.length; i++) {
+						this.bodies[i].update();
+					}
+				}
 	    },
 
 	    draw: function(screen) {
 	    	screen.clearRect(5, 5, this.size.x - 10, this.size.y - 10);
-		    for (var i = 0; i < this.bodies.length; i++) {
-		    	this.bodies[i].draw(screen);
-		    }
+			for (var i = 0; i < this.bodies.length; i++) {
+			   	this.bodies[i].draw(screen);
+			}
 	    },
 
 	    addBody: function(body) {
-	      this.bodies.push(body);
+	    	this.bodies.push(body);
 	    },
 
 	    removeBody: function(body) {
-	      var bodyIndex = this.bodies.indexOf(body);
-	      if (bodyIndex !== -1) {
-	        this.bodies.splice(bodyIndex, 1);
-	      }
+			var bodyIndex = this.bodies.indexOf(body);
+			if (bodyIndex !== -1) {
+				this.bodies.splice(bodyIndex, 1);
+			}
 	    },
 
 	    end: function() {
@@ -87,16 +88,16 @@
 		update: function (argument) {
 			switch(this.direction) {
 			 	case 'l':
-					this.center.x -= this.game.speed;
+					this.center.x -= 1;
 					break;
 				case 'r':
-					this.center.x += this.game.speed;
+					this.center.x += 1;
 					break;
 				case 'u':
-					this.center.y -= this.game.speed;
+					this.center.y -= 1;
 					break;
 				case 'd':
-					this.center.y += this.game.speed;
+					this.center.y += 1;
 					break;
 			}
 		}
@@ -140,16 +141,16 @@
 		// Move the head
 		switch(this.direction) {
 		 	case 'l':
-				this.center.x -= this.game.speed;
+				this.center.x -= 1;
 				break;
 			case 'r':
-				this.center.x += this.game.speed;
+				this.center.x += 1;
 				break;
 			case 'u':
-				this.center.y -= this.game.speed;
+				this.center.y -= 1;
 				break;
 			case 'd':
-				this.center.y += this.game.speed;
+				this.center.y += 1;
 				break;
 		}
 
@@ -209,8 +210,9 @@
 					break;
 			}
 		this.game.score += 100;
-		this.game.screenScore.innerHTML = this.game.score;
+		this.game.speed *= 2;
 		this._addSegment(newSegment);
+		this.game.screenScore.innerHTML = this.game.score;
 		}
 
 
