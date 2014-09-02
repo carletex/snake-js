@@ -4,25 +4,32 @@
 	var Game = function() {
 		var screen = document.getElementById("screen").getContext('2d');
 		this.screenScore = document.getElementById("score");
-		this.score = 0;
 
 		this.size = { x: screen.canvas.width, y: screen.canvas.height };
-		screen.lineWidth = 10;
-		screen.strokeRect(0, 0, this.size.x, this.size.y);
+		screen.lineWidth = 5;
+		screen.strokeRect(2.5, 2.5, this.size.x - 5, this.size.y - 5);
 		this.center = { x: this.size.x / 2, y: this.size.y / 2 };
 
 		var confSnake = {x: this.size.x / 2, y: this.size.y / 2, direction: 'r'};
 		this.bodies = [new SnakeHead(this, confSnake), new Food(this)];
 
+   	 	this.score = 0;
    	 	this.speed = 1;
+
+   	 	this.stop = 0;
+
 
 		var self = this;
 		var tick = function() {
 			self.update();
 			self.draw(screen);
 			self.animationID = requestAnimationFrame(tick);
+			if (self.stop) {
+	    		cancelAnimationFrame(self.animationID);
+			}
 		};
 		tick();
+
 	}
 
 ;	Game.prototype = {
@@ -49,6 +56,11 @@
 	      if (bodyIndex !== -1) {
 	        this.bodies.splice(bodyIndex, 1);
 	      }
+	    },
+
+	    end: function() {
+	    	this.stop = 1;
+	    	this.screenScore.innerHTML = 'GAME OVER. You score: ' + this.score;
 	    }
   	};
 
@@ -67,11 +79,9 @@
 	SnakeSegment.prototype = {
 
 		draw: function(screen) {
- 	    	// for (var i = 0; i < this.tail.length; i++) {
- 	    		screen.fillRect(this.center.x - this.size.x / 2,
-			    	this.center.y - this.size.y / 2,
-					this.size.x, this.size.y);
- 	    	// };
+    		screen.fillRect(this.center.x - this.size.x / 2,
+	    		this.center.y - this.size.y / 2,
+				this.size.x, this.size.y);
 
 		},
 		update: function (argument) {
@@ -166,14 +176,11 @@
 		};
 
 		// Wall collision
-		if (this.center.x + this.size.x / 2 > this.game.size.x) {
-			this.center.x = 10;
-		} else if (this.center.x + this.size.x / 2 < 0) {
-			this.center.x = this.game.size.x - 10;
-		} else if (this.center.y + this.size.y / 2 > this.game.size.y) {
-			this.center.y = 10;
-		} else if (this.center.y + this.size.y / 2 < 0) {
-			this.center.y = this.game.size.y - 10;
+		if ((this.center.x + this.size.x / 2 > this.game.size.x - 5) ||
+			(this.center.y + this.size.y / 2 > this.game.size.y - 5) ||
+			(this.center.x - this.size.x / 2 < 5) ||
+			(this.center.y - this.size.y / 2 < 5)) {
+				this.game.end();
 		}
 
 	}
