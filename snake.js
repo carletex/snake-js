@@ -225,8 +225,8 @@
    	 	this.size = { x: 5, y: 5 };
 
     	this.center = {
-    		x: Math.floor(Math.random() * (game.size.x - 10)) + 10,
-    		y: Math.floor(Math.random() * (game.size.y - 10)) + 10
+    		x: Math.floor(Math.random() * (game.size.x - 20)) + 10,
+    		y: Math.floor(Math.random() * (game.size.y - 20)) + 10
     	};
 
     	this.keyboarder = new Keyboarder();
